@@ -1,0 +1,20 @@
+{
+  "name": "rturox-academy",
+  "version": "1.0.0",
+  "description": "Rturox Academy Internship and Courses Registration Portal",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y live-server ./"
+  },
+  "keywords": [
+    "rturox",
+    "academy",
+    "internship",
+    "courses"
+  ],
+  "author": "Rturox",
+  "license": "ISC",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
