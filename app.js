@@ -355,43 +355,7 @@ window.closeModal = function() {
     }
 };
 
-/**
- * Quick Helper to Fill Mock Data for demonstration/testing
- */
-window.fillDemoForm = function() {
-    const form = document.getElementById('application-form');
-    if (!form) return;
-    
-    // Step 1
-    form.querySelector('input[name="fullName"]').value = 'Saritha Kumar';
-    form.querySelector('input[name="email"]').value = 'saritha.kumar@gmail.com';
-    form.querySelector('input[name="phone"]').value = '9876543210';
-    form.querySelector('input[name="whatsapp"]').value = '9876543210';
-    
-    // Step 2
-    // Program choice - Let's choose Both
-    const radBoth = document.querySelector('input[name="programChoice"][value="Both"]');
-    if (radBoth) {
-        radBoth.checked = true;
-        radBoth.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    
-    // Wait a brief moment for the specialization select to populate
-    setTimeout(() => {
-        const specSelect = form.querySelector('select[name="specialization"]');
-        if (specSelect) specSelect.value = 'Both - Full Stack Python Development';
-        
-        form.querySelector('select[name="skillLevel"]').value = 'Intermediate';
-    }, 100);
-    
-    // Step 3
-    form.querySelector('input[name="collegeName"]').value = 'PSG College of Technology';
-    form.querySelector('input[name="department"]').value = 'B.Tech Information Technology';
-    form.querySelector('select[name="gradYear"]').value = '2027';
-    form.querySelector('input[name="githubUrl"]').value = 'https://github.com/saritha-tech';
-    form.querySelector('input[name="linkedinUrl"]').value = 'https://linkedin.com/in/sarithakumar';
-    form.querySelector('textarea[name="sop"]').value = 'Highly interested in full-stack Python engineering. Eager to gain real project experience working with the Rturox tech studio team.';
-};
+// Quick Helper to Fill Mock Data has been removed for production.
 
 /**
  * ----------------------------------------------------
@@ -426,18 +390,30 @@ function showPinLock() {
     
     // Input chaining logic
     pinInputs.forEach((input, index) => {
-        input.addEventListener('keyup', (e) => {
-            if (e.key >= '0' && e.key <= '9') {
+        // Move focus forward when a character is typed
+        input.addEventListener('input', () => {
+            if (input.value.length === 1) {
                 if (index < pinInputs.length - 1) {
                     pinInputs[index + 1].focus();
                 } else {
-                    // All digits entered, check pin
+                    // Last digit entered, verify
                     verifyPin();
                 }
-            } else if (e.key === 'Backspace') {
-                if (index > 0) {
-                    pinInputs[index - 1].focus();
+            }
+        });
+
+        // Keydown handler for backspace key to delete and shift focus backwards
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace') {
+                if (input.value === '') {
+                    if (index > 0) {
+                        pinInputs[index - 1].focus();
+                        pinInputs[index - 1].value = '';
+                    }
+                } else {
+                    input.value = '';
                 }
+                e.preventDefault();
             }
         });
     });
@@ -461,74 +437,19 @@ function showPinLock() {
 }
 
 function loadDashboardData() {
-    // Fetch registered students
-    candidates = JSON.parse(localStorage.getItem('rturox_candidates') || '[]');
+    // Fetch registered students safely with try-catch
+    try {
+        candidates = JSON.parse(localStorage.getItem('rturox_candidates') || '[]');
+    } catch (e) {
+        console.error('Failed to parse candidates database:', e);
+        candidates = [];
+    }
     
     // Render Statistics & Tables
     updateDashboardUI();
     
     // Setup Filter Event Listeners
     setupFilters();
-}
-
-function seedDummyData() {
-    candidates = [
-        {
-            id: 'RTX-928172-12',
-            name: 'Kavin Prasad',
-            email: 'kavin.prasad@gmail.com',
-            phone: '9840294821',
-            whatsapp: '9840294821',
-            college: 'Coimbatore Institute of Technology',
-            department: 'B.E. Computer Science Engineering',
-            year: '2026',
-            program: 'Internship',
-            specialization: 'Intern - Full Stack Web Development (MERN/Next.js)',
-            experience: 'Intermediate',
-            github: 'https://github.com/kavinprasad',
-            linkedin: 'https://linkedin.com/in/kavin-prasad',
-            notes: 'Looking for a challenging internship. I have built two React projects already.',
-            status: 'Accepted',
-            appliedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days ago
-        },
-        {
-            id: 'RTX-103982-45',
-            name: 'Nisha Sundar',
-            email: 'nisha.sundar@yahoo.com',
-            phone: '9043810293',
-            whatsapp: '9043810293',
-            college: 'Amrita Vishwa Vidyapeetham',
-            department: 'B.E. Electronics & Communication',
-            year: '2027',
-            program: 'Course',
-            specialization: 'Course - UI/UX Design & Prototyping (Figma)',
-            experience: 'Beginner',
-            github: 'N/A',
-            linkedin: 'https://linkedin.com/in/nisha-sundar',
-            notes: 'Passionate about mobile designs and interfaces. Excited to learn Figma professionally.',
-            status: 'Interview',
-            appliedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() // 1 day ago
-        },
-        {
-            id: 'RTX-837190-23',
-            name: 'Rahul Dev',
-            email: 'rahul.dev@outlook.com',
-            phone: '8098123456',
-            whatsapp: '8098123456',
-            college: 'Sri Krishna College of Engineering & Tech',
-            department: 'B.Tech Information Technology',
-            year: '2026',
-            program: 'Both',
-            specialization: 'Both - Full Stack Python Development',
-            experience: 'Intermediate',
-            github: 'https://github.com/rahul-dev-99',
-            linkedin: 'https://linkedin.com/in/rahuldev',
-            notes: 'Want to master Python Django and do an internship concurrently to apply my knowledge.',
-            status: 'Pending',
-            appliedAt: new Date().toISOString() // today
-        }
-    ];
-    localStorage.setItem('rturox_candidates', JSON.stringify(candidates));
 }
 
 function updateDashboardUI() {
@@ -566,38 +487,43 @@ function renderTable(filteredCandidates = candidates) {
         return;
     }
     
-    // Sort: newest first
-    const sorted = [...filteredCandidates].sort((a, b) => new Date(b.appliedAt) - new Date(a.appliedAt));
+    // Sort safely: newest first
+    const sorted = [...filteredCandidates].sort((a, b) => {
+        const dateA = a.appliedAt ? new Date(a.appliedAt) : new Date(0);
+        const dateB = b.appliedAt ? new Date(b.appliedAt) : new Date(0);
+        return dateB - dateA;
+    });
     
     sorted.forEach(c => {
         const tr = document.createElement('tr');
         
-        // Format Date
-        const dateStr = new Date(c.appliedAt).toLocaleDateString('en-IN', {
+        // Format Date safely
+        const dateStr = c.appliedAt ? new Date(c.appliedAt).toLocaleDateString('en-IN', {
             day: '2-digit',
             month: 'short',
             year: 'numeric'
-        });
+        }) : 'N/A';
         
         // Status Class mappings
         let statusClass = 'pending';
-        if (c.status === 'Interview') statusClass = 'interview';
-        if (c.status === 'Accepted') statusClass = 'accepted';
-        if (c.status === 'Rejected') statusClass = 'rejected';
+        const currentStatus = c.status || 'Pending';
+        if (currentStatus === 'Interview') statusClass = 'interview';
+        if (currentStatus === 'Accepted') statusClass = 'accepted';
+        if (currentStatus === 'Rejected') statusClass = 'rejected';
         
         tr.innerHTML = `
-            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--primary);">${c.id}</td>
-            <td><strong style="color: var(--text-white);">${c.name}</strong></td>
+            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--primary);">${c.id || 'N/A'}</td>
+            <td><strong style="color: var(--text-white);">${c.name || 'N/A'}</strong></td>
             <td>
-                <div style="font-size: 0.85rem; color: var(--text-white);">${c.college}</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">${c.department} • Year ${c.year}</div>
+                <div style="font-size: 0.85rem; color: var(--text-white);">${c.college || 'N/A'}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">${c.department || 'N/A'} • Year ${c.year || 'N/A'}</div>
             </td>
             <td>
-                <div style="font-size: 0.85rem; color: var(--text-white);">${c.program}</div>
-                <div style="font-size: 0.75rem; color: var(--primary); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${c.specialization}">${c.specialization}</div>
+                <div style="font-size: 0.85rem; color: var(--text-white);">${c.program || 'N/A'}</div>
+                <div style="font-size: 0.75rem; color: var(--primary); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${c.specialization || ''}">${c.specialization || 'N/A'}</div>
             </td>
             <td>${dateStr}</td>
-            <td><span class="status-pill ${statusClass}">${c.status}</span></td>
+            <td><span class="status-pill ${statusClass}">${currentStatus}</span></td>
             <td>
                 <div class="action-flex">
                     <span class="action-link" onclick="openDrawer('${c.id}')">View Details</span>
@@ -628,11 +554,11 @@ function runFilters() {
     const domain = document.getElementById('filter-domain').value;
     
     const filtered = candidates.filter(c => {
-        // Search text check
-        const matchesSearch = c.name.toLowerCase().includes(query) || 
-                              c.college.toLowerCase().includes(query) || 
-                              c.email.toLowerCase().includes(query) ||
-                              c.id.toLowerCase().includes(query);
+        // Search text check with safe null/undefined guards
+        const matchesSearch = (c.name ? c.name.toLowerCase().includes(query) : false) || 
+                              (c.college ? c.college.toLowerCase().includes(query) : false) || 
+                              (c.email ? c.email.toLowerCase().includes(query) : false) ||
+                              (c.id ? c.id.toLowerCase().includes(query) : false);
                               
         // Program Check
         let matchesProg = true;
@@ -647,10 +573,10 @@ function runFilters() {
         // Status Check
         const matchesStatus = status === 'all' || c.status === status;
         
-        // Domain Check
+        // Domain Check with safe null/undefined guards
         let matchesDomain = true;
         if (domain !== 'all') {
-            matchesDomain = c.specialization.toLowerCase().includes(domain);
+            matchesDomain = c.specialization ? c.specialization.toLowerCase().includes(domain) : false;
         }
         
         return matchesSearch && matchesProg && matchesStatus && matchesDomain;
@@ -668,22 +594,32 @@ window.openDrawer = function(id) {
     if (!c) return;
     
     // Set field values
-    document.getElementById('drawer-candidate-id').textContent = c.id;
-    document.getElementById('drawer-name').textContent = c.name;
-    document.getElementById('drawer-email').textContent = c.email;
-    document.getElementById('drawer-email').href = `mailto:${c.email}`;
-    document.getElementById('drawer-phone').textContent = c.phone;
-    document.getElementById('drawer-phone').href = `tel:${c.phone}`;
-    document.getElementById('drawer-whatsapp').textContent = c.whatsapp;
-    document.getElementById('drawer-whatsapp').href = `https://wa.me/91${c.whatsapp}`;
+    document.getElementById('drawer-candidate-id').textContent = c.id || 'N/A';
+    document.getElementById('drawer-name').textContent = c.name || 'N/A';
+    document.getElementById('drawer-email').textContent = c.email || 'N/A';
+    document.getElementById('drawer-email').href = c.email ? `mailto:${c.email}` : '#';
+    document.getElementById('drawer-phone').textContent = c.phone || 'N/A';
+    document.getElementById('drawer-phone').href = c.phone ? `tel:${c.phone}` : '#';
     
-    // Fast Outreach CTA Prefills
-    const adminWaMessage = `Hi ${c.name}, this is Rturox Academy. We reviewed your application (${c.id}) for the ${c.program} - ${c.specialization}. We would like to schedule a brief call. Are you available this week?`;
-    document.getElementById('drawer-whatsapp-btn').href = `https://wa.me/91${c.whatsapp}?text=${encodeURIComponent(adminWaMessage)}`;
+    // Clean and format WhatsApp outreach link
+    const cleanedWhatsapp = (c.whatsapp || '').replace(/\D/g, '');
+    const whatsappNum = cleanedWhatsapp.startsWith('91') && cleanedWhatsapp.length === 12 ? cleanedWhatsapp : `91${cleanedWhatsapp.slice(-10)}`;
+    document.getElementById('drawer-whatsapp').textContent = c.whatsapp ? `+${whatsappNum}` : 'N/A';
+    document.getElementById('drawer-whatsapp').href = c.whatsapp ? `https://wa.me/${whatsappNum}` : '#';
+    
+    // Fast Outreach CTA Prefills with safeguards
+    const candName = c.name || '';
+    const candId = c.id || '';
+    const candProg = c.program || '';
+    const candSpec = c.specialization || '';
+    const candEmail = c.email || '';
+    
+    const adminWaMessage = `Hi ${candName}, this is Rturox Academy. We reviewed your application (${candId}) for the ${candProg} - ${candSpec}. We would like to schedule a brief call. Are you available this week?`;
+    document.getElementById('drawer-whatsapp-btn').href = c.whatsapp ? `https://wa.me/${whatsappNum}?text=${encodeURIComponent(adminWaMessage)}` : '#';
 
-    const emailSubject = `Rturox Academy Application Review - ${c.name} (${c.id})`;
-    const emailBody = `Dear ${c.name},\n\nThank you for applying to the Rturox Academy ${c.program} program for ${c.specialization}.\n\nWe have reviewed your profile and would like to schedule a 15-minute introductory Google Meet call to discuss the program details, schedule, and prerequisites.\n\nPlease let us know your availability over the next 2-3 days.\n\nBest regards,\nRturox Tech Studio Coordinator\nCoimbatore`;
-    document.getElementById('drawer-email-btn').href = `mailto:${c.email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    const emailSubject = `Rturox Academy Application Review - ${candName} (${candId})`;
+    const emailBody = `Dear ${candName},\n\nThank you for applying to the Rturox Academy ${candProg} program for ${candSpec}.\n\nWe have reviewed your profile and would like to schedule a 15-minute introductory Google Meet call to discuss the program details, schedule, and prerequisites.\n\nPlease let us know your availability over the next 2-3 days.\n\nBest regards,\nRturox Tech Studio Coordinator\nCoimbatore`;
+    document.getElementById('drawer-email-btn').href = candEmail ? `mailto:${candEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}` : '#';
     document.getElementById('drawer-college').textContent = c.college;
     document.getElementById('drawer-dept').textContent = c.department;
     document.getElementById('drawer-year').textContent = c.year;
@@ -761,22 +697,22 @@ window.exportToCSV = function() {
     
     candidates.forEach(c => {
         const values = [
-            c.id,
+            c.id || '',
             escapeCSV(c.name),
             escapeCSV(c.email),
-            c.phone,
-            c.whatsapp,
+            c.phone || '',
+            c.whatsapp || '',
             escapeCSV(c.college),
             escapeCSV(c.department),
-            c.year,
+            c.year || '',
             escapeCSV(c.program),
             escapeCSV(c.specialization),
             escapeCSV(c.experience),
             escapeCSV(c.github),
             escapeCSV(c.linkedin),
             escapeCSV(c.notes),
-            c.status,
-            c.appliedAt
+            c.status || '',
+            c.appliedAt || ''
         ];
         csvRows.push(values.join(','));
     });
@@ -848,10 +784,10 @@ function renderVisualAnalytics() {
     ratioProgText.textContent = `Internships: ${internPerc}% | Courses: ${coursePerc}%`;
     barProgRatio.style.width = `${internPerc}%`;
 
-    // 2. Calculate Domain Distribution percentages
-    const pythonCount = candidates.filter(c => c.specialization.toLowerCase().includes('python')).length;
-    const javaCount = candidates.filter(c => c.specialization.toLowerCase().includes('java')).length;
-    const webCount = candidates.filter(c => c.specialization.toLowerCase().includes('web') || c.specialization.toLowerCase().includes('mern')).length;
+    // 2. Calculate Domain Distribution percentages with safe filters
+    const pythonCount = candidates.filter(c => c.specialization && c.specialization.toLowerCase().includes('python')).length;
+    const javaCount = candidates.filter(c => c.specialization && c.specialization.toLowerCase().includes('java')).length;
+    const webCount = candidates.filter(c => c.specialization && (c.specialization.toLowerCase().includes('web') || c.specialization.toLowerCase().includes('mern'))).length;
     
     const pyPerc = total > 0 ? Math.round((pythonCount / total) * 100) : 0;
     const jaPerc = total > 0 ? Math.round((javaCount / total) * 100) : 0;
@@ -880,77 +816,6 @@ function renderVisualAnalytics() {
         topDomainText.textContent = 'No Domain Selected';
     }
 }
-
-/**
- * Seed Multiple Random Candidate Records
- */
-window.seedMultipleCandidates = function(count) {
-    const colleges = [
-        'PSG College of Technology', 
-        'Coimbatore Institute of Technology', 
-        'Amrita Vishwa Vidyapeetham', 
-        'Government College of Technology, CBE', 
-        'Sri Krishna College of Eng & Tech',
-        'Kumaraguru College of Technology'
-    ];
-    const depts = [
-        'B.E. Computer Science Engineering',
-        'B.Tech Information Technology',
-        'B.E. Electronics & Communication',
-        'B.Tech Artificial Intelligence'
-    ];
-    const names = [
-        'Abhishek Raja', 'Divya Balaji', 'Siddharth Nair', 'Pooja Krishnan',
-        'Hariharan S.', 'Keerthana Prasad', 'Vijay Karthik', 'Arun Kumar'
-    ];
-    const programs = ['Internship', 'Course', 'Both'];
-    const domains = [
-        { value: 'Intern - Full Stack Web Development (MERN/Next.js)', type: 'Internship' },
-        { value: 'Intern - Full Stack Python Development', type: 'Internship' },
-        { value: 'Intern - Java Enterprise Application Development', type: 'Internship' },
-        { value: 'Course - Full Stack Python Development', type: 'Course' },
-        { value: 'Course - Full Stack Java Development', type: 'Course' },
-        { value: 'Both - Full Stack Web Development (MERN/Next.js)', type: 'Both' }
-    ];
-    
-    const experienceLevels = ['Beginner', 'Intermediate', 'Advanced'];
-    const statuses = ['Pending', 'Interview', 'Accepted', 'Rejected'];
-
-    for (let i = 0; i < count; i++) {
-        const name = names[Math.floor(Math.random() * names.length)] + ' ' + String.fromCharCode(65 + Math.floor(Math.random() * 26)) + '.';
-        const randomCollege = colleges[Math.floor(Math.random() * colleges.length)];
-        const randomDept = depts[Math.floor(Math.random() * depts.length)];
-        const prog = programs[Math.floor(Math.random() * programs.length)];
-        
-        // Filter domains matching program choice
-        const matchedDomains = domains.filter(d => d.type === prog || (prog === 'Both' && d.type === 'Both'));
-        const dom = matchedDomains.length > 0 ? matchedDomains[Math.floor(Math.random() * matchedDomains.length)].value : domains[0].value;
-        
-        const newCand = {
-            id: 'RTX-' + (Math.floor(Math.random() * 900000) + 100000) + '-' + Math.floor(Math.random() * 100),
-            name: name,
-            email: name.toLowerCase().replace(/[^a-z]/g, '') + '@gmail.com',
-            phone: '9' + Math.floor(Math.random() * 900000000 + 100000000),
-            whatsapp: '9' + Math.floor(Math.random() * 900000000 + 100000000),
-            college: randomCollege,
-            department: randomDept,
-            year: String(2025 + Math.floor(Math.random() * 5)),
-            program: prog,
-            specialization: dom,
-            experience: experienceLevels[Math.floor(Math.random() * experienceLevels.length)],
-            github: 'https://github.com/username-test',
-            linkedin: 'https://linkedin.com/in/username-test',
-            notes: 'Generated via Coordinator DB utility for testing registration flows, filters, search functions and charts.',
-            status: statuses[Math.floor(Math.random() * statuses.length)],
-            appliedAt: new Date(Date.now() - Math.floor(Math.random() * 10) * 24 * 60 * 60 * 1000).toISOString() // random in past 10 days
-        };
-        candidates.push(newCand);
-    }
-    
-    localStorage.setItem('rturox_candidates', JSON.stringify(candidates));
-    updateDashboardUI();
-    runFilters();
-};
 
 /**
  * Clear Candidates Database completely
