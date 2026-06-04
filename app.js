@@ -461,11 +461,6 @@ function loadDashboardData() {
     // Fetch registered students
     candidates = JSON.parse(localStorage.getItem('rturox_candidates') || '[]');
     
-    // If database is empty, seed with some dummy candidates to make the dashboard look useful at first glance
-    if (candidates.length === 0) {
-        seedDummyData();
-    }
-    
     // Render Statistics & Tables
     updateDashboardUI();
     
