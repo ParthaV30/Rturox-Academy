@@ -84,12 +84,47 @@ The application will start serving at `http://127.0.0.1:8080/index.html` (or ano
 ├── admin.html       # Coordinator admin portal & dashboard UI
 ├── app.js           # Multi-step validation, dashboard logic & seed utilities
 ├── style.css        # Stylesheet containing responsive layout & theme rules
+├── vercel.json      # Production Vercel configuration
 ├── package.json     # Node scripts and dependencies
 └── README.md        # Documentation
 ```
 
 ---
 
+## 🚀 Deploying to Production
+
+This project is a static site and can be deployed directly to cloud hosting platforms.
+
+### 🔺 Deploy to Vercel (Recommended)
+Vercel offers zero-configuration hosting for static sites, and automatically handles SSL certificates and CDN caching.
+
+1. **Push your code** to your GitHub repository:
+   ```bash
+   git push origin main
+   ```
+2. Log in to [Vercel](https://vercel.com).
+3. Click **"New Project"** and import the `Rturox-Academy` repository.
+4. Leave the **Build and Output Settings** at their default values (there is no build step needed).
+5. Click **"Deploy"**. Vercel will deploy the site and provide a public URL.
+6. The `vercel.json` file in this repository will automatically set up clean URLs (e.g. yoursite.com/admin instead of yoursite.com/admin.html) and apply security headers.
+
+### ☁️ Deploy to AWS
+
+#### Option A: AWS Amplify (Easiest)
+1. Log in to the [AWS Management Console](https://aws.amazon.com) and navigate to **AWS Amplify**.
+2. Click **"New App"** -> **"Host web app"**.
+3. Select **GitHub** and authorize Amplify to access your repository.
+4. Choose the repository and the `main` branch.
+5. In the build settings, Amplify will auto-detect the static site. Confirm the settings and click **"Save and Deploy"**.
+
+#### Option B: Amazon S3 & CloudFront
+1. Navigate to **Amazon S3** and create a new bucket (e.g. `rturox-academy-portal`).
+2. Upload the project files (`index.html`, `admin.html`, `app.js`, `style.css`, `vercel.json`) to the root of the bucket.
+3. Enable **Static Website Hosting** under the bucket's *Properties* tab, setting `index.html` as the index document.
+4. To secure the site with HTTPS, create a distribution in **Amazon CloudFront**, pointing the origin to the S3 bucket's website endpoint.
+
+---
+
 ## 💡 Developer Guidelines
 * **Responsive Styling**: Ensure CSS variables from `style.css` are used for color theme consistency.
-* **Local Database**: All user submissions target the `rturox_candidates` key in `localStorage`. Use the **Seed Data** tool on the admin panel to populate sandbox records during testing.
+* **Local Database**: All user submissions target the `rturox_candidates` key in `localStorage` in the browser, making it completely serverless.
