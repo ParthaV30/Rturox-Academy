@@ -56,6 +56,9 @@ function initProgramSelections() {
         // Match initial status
         if (input && input.checked) {
             opt.classList.add('selected');
+            if (input.name === 'programChoice') {
+                toggleSpecializationFields(input.value);
+            }
         }
 
         opt.addEventListener('click', (e) => {
@@ -367,7 +370,7 @@ window.fillDemoForm = function() {
     
     // Step 2
     // Program choice - Let's choose Both
-    const radBoth = document.getElementById('choiceBoth');
+    const radBoth = document.querySelector('input[name="programChoice"][value="Both"]');
     if (radBoth) {
         radBoth.checked = true;
         radBoth.dispatchEvent(new Event('change', { bubbles: true }));
